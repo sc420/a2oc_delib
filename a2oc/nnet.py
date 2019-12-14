@@ -83,10 +83,10 @@ class Model():
       conv_type = dnn.Conv2DDNNLayer if dnn_type else Conv2DLayer
       poolsize = tuple(model["pool"]) if "pool" in model else (1,1)
       stride = tuple(model["stride"]) if "stride" in model else (1,1)
-      layer = conv_type(inputs, 
-        model["out_size"], 
-        filter_size=model["filter_size"], 
-        stride=stride, 
+      layer = conv_type(inputs,
+        model["out_size"],
+        filter_size=model["filter_size"],
+        stride=stride,
         nonlinearity=self.get_activation(model),
         W=get_init(model, "W"),
         b=get_init(model, "b"),
@@ -118,7 +118,7 @@ class Model():
 
     new_layer = tuple(input_size) if isinstance(input_size, list) else input_size
     model = [model_in] if isinstance(model_in, dict) else model_in
-    
+
     print "Building following model..."
     print model
 

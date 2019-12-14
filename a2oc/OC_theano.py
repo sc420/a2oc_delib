@@ -1,12 +1,13 @@
-from nnet import Model, MLP3D
 import numpy as np
 import sys,pickle,os,theano
 import theano.tensor as T
 from lasagne.updates import norm_constraint
 from collections import OrderedDict
 
+from a2oc.nnet import Model, MLP3D
+
 def clip_grads(grads, clip, clip_type):
-  if clip > 0.1: 
+  if clip > 0.1:
     if clip_type == "norm":
       grads = [norm_constraint(p, clip) if p.ndim > 1 else T.clip(p, -clip, clip) for p in grads]
     elif clip_type == "global":
@@ -74,7 +75,7 @@ class AOCAgent_THEANO():
     entropy = -aggr(T.sum(intra_option_policy*T.log(intra_option_policy+log_eps), axis=1))*args.entropy_reg
     pg = aggr((T.log(intra_option_policy[T.arange(a.shape[0]), a]+log_eps)) * (y-disc_opt_q))
     cost = pg + entropy - critic_cost - termination_grad
-    
+
     grads = T.grad(cost*args.update_freq, self.params)
     #grads = T.grad(cost, self.params)
     updates, grad_rms, self.rms_weights = rmsprop(self.params, grads, clip=args.clip, clip_type=args.clip_type)
@@ -122,7 +123,7 @@ class AOCAgent_THEANO():
 
   def set_rms_shared_weights(self, shared_arr):
     if shared_arr is not None:
-      self.shared_arr = [np.frombuffer(s, dtype="float32").reshape(p.get_value().shape) for s, p in zip(shared_arr, self.params)] 
+      self.shared_arr = [np.frombuffer(s, dtype="float32").reshape(p.get_value().shape) for s, p in zip(shared_arr, self.params)]
       self.rms_shared_arr = shared_arr[len(self.params):]
       if self.args.init_num_moves > 0:
         for s, p in zip(shared_arr, self.params):
@@ -133,7 +134,7 @@ class AOCAgent_THEANO():
     # Ties rms params between threads with borrow=True flag
     if self.args.rms_shared and shared_arr is not None:
       assert(len(self.rms_weights) == len(self.rms_shared_arr))
-      for rms_w, s_rms_w in zip(self.rms_weights, self.rms_shared_arr): 
+      for rms_w, s_rms_w in zip(self.rms_weights, self.rms_shared_arr):
         rms_w.set_value(np.frombuffer(s_rms_w, dtype="float32").reshape(rms_w.get_value().shape), borrow=True)
 
   def get_action(self, x):
@@ -179,7 +180,7 @@ class AOCAgent_THEANO():
     self.reset_tracker()
     self.update_internal_state(x)
     self.initialized = True
-    
+
   def reset_storing(self):
     self.a_seq = np.zeros((self.args.max_update_freq,), dtype="int32")
     self.o_seq = np.zeros((self.args.max_update_freq,), dtype="int32")
@@ -190,7 +191,7 @@ class AOCAgent_THEANO():
   def store(self, x, new_x, action, raw_reward, done, death):
     end_ep = done or (death and self.args.death_ends_episode)
     self.frame_counter += 1
-    
+
     self.total_reward += raw_reward
     reward = np.clip(raw_reward, -1, 1)
 
@@ -204,7 +205,7 @@ class AOCAgent_THEANO():
 
     self.t_counter += 1
 
-    # do n-step return to option termination. 
+    # do n-step return to option termination.
     # cut off at self.args.max_update_freq
     # min steps: self.args.update_freq (usually 5 like a3c)
     # this doesn't make option length a minimum of 5 (they can still terminate). only batch size
@@ -217,7 +218,7 @@ class AOCAgent_THEANO():
         for j in range(self.t_counter-1,-1,-1):
           R = np.float32(self.r_seq[j] + self.args.gamma*R)
           V.append(R)
-        self.update_weights(self.x_seq[:self.t_counter], self.a_seq[:self.t_counter], V[::-1], 
+        self.update_weights(self.x_seq[:self.t_counter], self.a_seq[:self.t_counter], V[::-1],
                             self.o_seq[:self.t_counter], self.t_counter, self.delib+self.args.margin_cost)
       self.reset_storing()
     if not end_ep:

@@ -1,10 +1,11 @@
 from multiprocessing import Process, Value, Array, RawArray
 from collections import OrderedDict
 import numpy as np
-from OC_theano import AOCAgent_THEANO
 import cv2,copy,sys,pickle,os,time,argparse
 from PIL import Image
 from utils.helper import foldercreation, str2bool, get_folder_name
+
+from a2oc.OC_theano import AOCAgent_THEANO
 
 class Environment():
   def reset(self):
@@ -87,7 +88,7 @@ class ALE_env(Environment):
     new_frame = self.preprocess(self.new_obs, self.old_obs)
     self.get_new_frame(new_frame)
     dones += (self.get_frame_count() > self.args.max_frames_ep)
-    
+
     new_lives = self.get_lives()
     death = new_lives < self.lives
     self.lives = new_lives
@@ -144,7 +145,7 @@ class Training():
         recent_fps = recent_fps[-9:]+[fps]
         eta = ((self.args.max_num_frames-self.num_moves.value)*self.args.frame_skip/(self.args.num_threads*np.mean(recent_fps)))
         print "id: %d\treward: %d\ttime: %.1f\tframes: %d\t %dfps  \tmoves: %d \t ETA: %dh %dm %ds  \t%.2f%%" % \
-        (self.id_num, total_reward, secs, frames, fps, self.num_moves.value, int(eta/3600), int(eta/60)%60, int(eta%60), 
+        (self.id_num, total_reward, secs, frames, fps, self.num_moves.value, int(eta/3600), int(eta/60)%60, int(eta%60),
           float(self.num_moves.value)/self.args.max_num_frames*100)
         timer = time.time()
         frame_counter = 0
@@ -192,7 +193,7 @@ def parse_params():
   parser.add_argument('--option-epsilon', type=float, default=0.1)
   parser.add_argument('--delib-cost', type=float, default=0.0)
   parser.add_argument('--margin-cost', type=float, default=0.0)
-  parser.add_argument('--save-path', type=str, default="models") 
+  parser.add_argument('--save-path', type=str, default="models")
   parser.add_argument('--load-folder', type=str, default="") # if not empty, will load folder to resume training
   parser.add_argument('--folder-name', type=str, default="")
   parser.add_argument('--resume-if-exists', type=str2bool, default=False) # for server that kills and restarts processes
@@ -236,7 +237,7 @@ if __name__ == '__main__':
   env = ALE_env(params)
   if init_num_moves == 0:
     init_weights = (AOCAgent_THEANO(env.action_space, 0, args=params)).get_param_vals()
-    
+
   num_moves = Value("i", init_num_moves, lock=False)
   arr = [Array('f', m.flatten(), lock=False) for m in init_weights]
   seed = np.random.randint(10000)
