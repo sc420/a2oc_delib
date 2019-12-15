@@ -3,8 +3,8 @@ from collections import OrderedDict
 import numpy as np
 import cv2,copy,sys,pickle,os,time,argparse
 from PIL import Image
-from utils.helper import foldercreation, str2bool, get_folder_name
 
+from a2oc.utils.helper import foldercreation, str2bool, get_folder_name
 from a2oc.OC_theano import AOCAgent_THEANO
 
 class Environment():
