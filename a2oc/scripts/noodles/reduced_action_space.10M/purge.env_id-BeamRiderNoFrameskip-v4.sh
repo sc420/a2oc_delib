@@ -2,25 +2,25 @@
 
 # Cause the script to exit on any errors
 # Reference: https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
-set -euxo pipefail
+set -euo pipefail
 
 ################################################################################
-# Update Training Scripts
+# Set Actions
 ################################################################################
 
-python a2oc/scripts/train/test/_generators/gen_scripts.run.py
-python a2oc/scripts/train/reduced_action_space.10M/_generators/gen_scripts.run.py
+# Set the Noodles action
+export NOODLES_ACTION="purge"
 
 ################################################################################
-# Update Noodles Scripts
+# Set Paths
 ################################################################################
 
-python a2oc/scripts/noodles/test/_generators/gen_scripts.py
-python a2oc/scripts/noodles/reduced_action_space.10M/_generators/gen_scripts.py
+# Set the path of the spec
+export SPEC_PATH='a2oc/specs/train/reduced_action_space.10M/env_id-BeamRiderNoFrameskip-v4.yml'
 
 ################################################################################
-# Update Noodles Specs
+# Start Training
 ################################################################################
 
-python a2oc/specs/train/test/_generators/gen_specs.py
-python a2oc/specs/train/reduced_action_space.10M/_generators/gen_specs.py
+# Run the common script
+bash "a2oc/scripts/noodles/_common/$NOODLES_ACTION.sh"

@@ -1,0 +1,26 @@
+# Name of the spec
+name: a2oc Reduced Action Space 10M
+
+# Description of the spec
+description: Train A2OC with reduced action space for 10M timesteps
+
+################################################################################
+# Common
+################################################################################
+
+{common_content}
+
+################################################################################
+# Experiments
+################################################################################
+
+# The main experiments
+experiments:
+
+### Run ###
+
+{run_contents}
+
+### Download ###
+
+{download_contents}

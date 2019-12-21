@@ -2,25 +2,28 @@
 
 # Cause the script to exit on any errors
 # Reference: https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
-set -euxo pipefail
+set -euo pipefail
 
 ################################################################################
-# Update Training Scripts
+# Set Names
 ################################################################################
 
-python a2oc/scripts/train/test/_generators/gen_scripts.run.py
-python a2oc/scripts/train/reduced_action_space.10M/_generators/gen_scripts.run.py
+# Set the name
+export NAME="reduced_action_space.10M"
 
 ################################################################################
-# Update Noodles Scripts
+# Set Variable Training Arguments
 ################################################################################
 
-python a2oc/scripts/noodles/test/_generators/gen_scripts.py
-python a2oc/scripts/noodles/reduced_action_space.10M/_generators/gen_scripts.py
+# Set the environment ID
+export ENV_ID="KungFuMasterNoFrameskip-v4"
+
+# Set the seed
+export SEED=1002
 
 ################################################################################
-# Update Noodles Specs
+# Run the Common Script
 ################################################################################
 
-python a2oc/specs/train/test/_generators/gen_specs.py
-python a2oc/specs/train/reduced_action_space.10M/_generators/gen_specs.py
+# Run the common script
+bash "a2oc/scripts/train/$NAME/_common/run.sh"
