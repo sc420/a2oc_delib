@@ -22,7 +22,7 @@ source "a2oc/scripts/train/_common/init_training_environment.sh"
 ################################################################################
 
 # Set the total number of frames for training
-export MAX_NUM_FRAMES=500000
+export MAX_NUM_FRAMES=10000000
 
 # Set the number of options
 export NUM_OPTIONS=8
