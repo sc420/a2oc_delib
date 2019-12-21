@@ -4,7 +4,7 @@ import numpy as np
 
 class AtariActionRemapperWrapper(gym.Wrapper):
     def __init__(self, env):
-        super().__init__(env)
+        super(AtariActionRemapperWrapper, self).__init__(env)
 
         # Get action remap
         self.action_remap = self._get_action_remap(env)
