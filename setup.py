@@ -145,6 +145,7 @@ setup(
         'matplotlib==2.2.4',
         'numpy==1.16.5',
         'opencv-python==4.1.2.30',
+        'pandas==0.24.2',
         'Pillow==2.2.2',
         'Theano==1.0.4',
     ],  # Optional
