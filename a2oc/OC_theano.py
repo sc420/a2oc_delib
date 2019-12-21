@@ -120,7 +120,7 @@ class AOCAgent_THEANO():
 
   def save_values_at_epoch(self, folder_name, epoch):
     pickle.dump([p.get_value() for p in self.params+self.rms_weights], open(folder_name+"/tmp_model.pkl", "wb"))
-    os.system("mv "+folder_name+"/tmp_model.pkl "+folder_name+"/model/epoch-{}.pkl".format(epoch))
+    os.system("mv "+folder_name+"/tmp_model.pkl "+folder_name+"/model.epoch-{}.pkl".format(epoch))
 
   def get_param_vals(self):
     return [m.get_value() for m in self.params+self.rms_weights]
