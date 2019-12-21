@@ -11,8 +11,9 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from a2oc.utils.helper import foldercreation, str2bool, get_folder_name
+from a2oc.atari_action_remapper import AtariActionRemapperWrapper
 from a2oc.OC_theano import AOCAgent_THEANO
+from a2oc.utils.helper import foldercreation, str2bool, get_folder_name
 
 
 STEPS_PER_EPOCH = 250000
@@ -36,6 +37,10 @@ class ALE_env(Environment):
     def __init__(self, args, rng=None):
         import gym
         env = gym.make(args.env)
+
+        if args.reduced_action_space:
+            env = AtariActionRemapperWrapper(env)
+
         self.args = args
         self.rng = rng
         self.env = env
@@ -276,6 +281,7 @@ def parse_params():
     parser.add_argument('--resume-if-exists', type=str2bool, default=False)
 
     parser.add_argument('--seed', type=int, default=1000)
+    parser.add_argument('--reduced_action_space', type=str2bool, default=False)
     return parser.parse_known_args()[0]  # parser.parse_args()
 
 
