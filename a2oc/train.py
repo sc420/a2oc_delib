@@ -15,6 +15,9 @@ from a2oc.utils.helper import foldercreation, str2bool, get_folder_name
 from a2oc.OC_theano import AOCAgent_THEANO
 
 
+STEPS_PER_EPOCH = 250000
+
+
 class Environment():
     def reset(self):
         raise NotImplementedError
@@ -135,10 +138,14 @@ class Training():
         self.agent = AOCAgent_THEANO(
             self.env.action_space, id_num, arr, num_moves, args)
 
+        self.last_epoch = 0
+        self.init_training_results()
+
         self.train()
 
     def train(self):
         total_reward = 0
+        episode_reward_upon_death = 0
         x = self.env.reset()
         self.agent.reset(x)
         timer = time.time()
@@ -149,6 +156,10 @@ class Training():
 
         while self.num_moves.value < self.args.max_num_frames:
             if done:
+                cur_time = time.time()
+                values = [frame_counter, total_reward, cur_time]
+                self.append_training_result_values(values)
+
                 # ugly code, beautiful print
                 total_games += 1
                 secs = round(time.time()-timer, 1)
@@ -161,11 +172,17 @@ class Training():
                     (self.id_num, total_reward, secs, frames, fps, self.num_moves.value, int(eta/3600), int(eta/60) % 60, int(eta % 60),
                      float(self.num_moves.value)/self.args.max_num_frames*100)
                 timer = time.time()
-                frame_counter = 0
 
                 if total_games % 1 == 0 and self.id_num == 1 and not self.args.testing:
                     self.agent.save_values(folder_name)
                     print "saved model"
+
+                if self.id_num == 1 and not self.args.testing:
+                    cur_epoch = self.num_moves.value // STEPS_PER_EPOCH
+                    if cur_epoch > self.last_epoch:
+                        self.agent.save_values_at_epoch(folder_name, cur_epoch)
+                        self.last_epoch = cur_epoch
+
                 total_reward = 0
                 x = self.env.reset()
                 self.agent.reset(x)
@@ -178,6 +195,49 @@ class Training():
                 self.env.render()
             total_reward += reward
             x = np.copy(new_x)
+
+            frame_counter += 1
+
+            # Cumulate episode reward upon death or done
+            episode_reward_upon_death += reward
+            if death or done:
+                cur_time = time.time()
+                ep_life_values = [frame_counter,
+                                  episode_reward_upon_death, cur_time]
+                self.append_training_result_ep_life_values(ep_life_values)
+
+                episode_reward_upon_death = 0
+
+    def init_training_results(self):
+        training_result_path = self.get_training_result_path()
+        training_result_ep_life_path = self.get_training_result_ep_life_path()
+
+        with open(training_result_path, 'w') as f:
+            f.write('num_frames,episode_reward,time\n')
+        with open(training_result_ep_life_path, 'w') as f:
+            f.write('num_frames,episode_reward,time\n')
+
+    def append_training_result_values(self, values):
+        training_result_path = self.get_training_result_path()
+        self.append_csv(training_result_path, values)
+
+    def append_training_result_ep_life_values(self, ep_life_values):
+        training_result_ep_life_path = self.get_training_result_ep_life_path()
+        self.append_csv(training_result_ep_life_path, ep_life_values)
+
+    def append_csv(self, path, array):
+        str_array = [str(x) for x in array]
+        row = ','.join(str_array) + '\n'
+        with open(path, 'a') as f:
+            f.write(row)
+
+    def get_training_result_path(self):
+        filename = 'training_result.{}.csv'.format(self.id_num)
+        return self.args.folder_name + '/' + filename
+
+    def get_training_result_ep_life_path(self):
+        filename = 'training_result_ep_life.{}.csv'.format(self.id_num)
+        return self.args.folder_name + '/' + filename
 
 
 def parse_params():

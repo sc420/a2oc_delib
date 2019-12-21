@@ -27,7 +27,7 @@ def get_folder_name(args):
 
 
 def foldercreation(folder_name):
-    full_path = os.path.join(folder_name, folder_name)
+    full_path = os.path.abspath(folder_name)
     if not os.path.exists(full_path):
         os.makedirs(full_path)
     return full_path
